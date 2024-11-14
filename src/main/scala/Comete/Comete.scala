@@ -51,9 +51,11 @@ package object Comete {
 //    }
 //  }
 //
-    def normalizar(m: MedidaPol): MedidaPol = {
-//
-//
-    }
+//  def normalizar(m: MedidaPol): MedidaPol = {
+//    val peorCaso = m(Vector(0.5, 0.0, 0.0, 0.0, 0.5), Vector(0.0, 0.25, 0.5, 0.75, 1.0))
+//  
+//    (freq:Frequency, values:DistributionValues) => {
+//      m(freq, values)/peorCaso
+//    }
+//  }
  }
-//
