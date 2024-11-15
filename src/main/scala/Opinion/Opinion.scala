@@ -80,29 +80,41 @@ package object Opinion {
 
   def confBiasUpdate(b: SpecificBelief, swg: SpecificWeightedGraph): SpecificBelief = {
     val n = b.length
+    val (weightFunction, _) = swg  // Extrae la función de peso de la tupla
 
     // Actualiza la creencia de cada agente aplicando el sesgo de confirmación
     Vector.tabulate(n) { i =>
       // Calcula el valor de ajuste para cada agente j que influye sobre el agente i
       val influencias = for {
-        j <- 0 until n if swg(j, i) > 0
+        j <- 0 until n if weightFunction(j, i) > 0
       } yield {
         val beta_ij = 1 - math.abs(b(j) - b(i))
-        beta_ij * swg(j, i) * (b(j) - b(i))
+        beta_ij * weightFunction(j, i) * (b(j) - b(i))
       }
 
-      // Ajusta la creencia del agente i
-      b(i) + influencias.sum / influencias.size
+      // Verifica si hay influencias para evitar divisiones por cero
+      if (influencias.isEmpty) b(i) // Sin influencias, conserva la creencia original
+      else b(i) + influencias.sum / influencias.size
     }
   }
+
 
   /*def confBiasUpdate(sb: SpecificBelief, swg: SpecificWeightedGraph): SpecificBelief = {
 
   }*/
 
-  def showWeightedGraph(swg: SpecificWeightedGraph): IndexedSeq[IndexedSeq[Double]] = {
-  ...
-  }
+//  def showWeightedGraph(swg: SpecificWeightedGraph): IndexedSeq[IndexedSeq[Double]] = {
+//    //Extrae la función de influencia y el número de agentes del SpecificWeightedGraph
+//    val (graphFunc, nags) = swg
+//
+//    //Crea una matriz de influencias usando dos bucles for, donde:
+//    // - El bucle externo itera sobre el índice i, que representa el agente de origen
+//    // - El bucle interno itera sobre el índice j, que representa el agente de destino
+//    // Para cada par (i, j), calcula la influencia usando graphFunc(i, j) y almacena el resultado en la matriz.
+//    for (i <- 0 until nags) yield {
+//      for (j <- 0 until nags) yield graphFunc(i, j)
+//    }
+//  }
 
   def simulate(fu: FunctionUpdate, swg: SpecificWeightedGraph, b0: SpecificBelief, t: Int): IndexedSeq[SpecificBelief] = {
   ...
