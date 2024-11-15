@@ -78,9 +78,27 @@ package object Opinion {
 
   type FunctionUpdate = (SpecificBelief, SpecificWeightedGraph) => SpecificBelief
 
-  def confBiasUpdate(sb: SpecificBelief, swg: SpecificWeightedGraph): SpecificBelief = {
-  ...
+  def confBiasUpdate(b: SpecificBelief, swg: SpecificWeightedGraph): SpecificBelief = {
+    val n = b.length
+
+    // Actualiza la creencia de cada agente aplicando el sesgo de confirmación
+    Vector.tabulate(n) { i =>
+      // Calcula el valor de ajuste para cada agente j que influye sobre el agente i
+      val influencias = for {
+        j <- 0 until n if swg(j, i) > 0
+      } yield {
+        val beta_ij = 1 - math.abs(b(j) - b(i))
+        beta_ij * swg(j, i) * (b(j) - b(i))
+      }
+
+      // Ajusta la creencia del agente i
+      b(i) + influencias.sum / influencias.size
+    }
   }
+
+  /*def confBiasUpdate(sb: SpecificBelief, swg: SpecificWeightedGraph): SpecificBelief = {
+
+  }*/
 
   def showWeightedGraph(swg: SpecificWeightedGraph): IndexedSeq[IndexedSeq[Double]] = {
   ...
