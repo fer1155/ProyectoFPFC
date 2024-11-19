@@ -22,3 +22,17 @@ cmt1(pi_int_3, liker_t5)
 cmt1(pi_con_scentro, liker_t5)
 cmt1(pi_con_sder, liker_t5)
 cmt1(pi_con_sizq, liker_t5)
+//Pruebas Normalizar
+val cmt1_norm = normalizar(cmt1)
+cmt1_norm(pi_max, liker_t5)
+cmt1_norm(pi_min, liker_t5)
+cmt1_norm(pi_der, liker_t5)
+cmt1_norm(pi_izq, liker_t5)
+cmt1_norm(pi_int_1, liker_t5)
+cmt1_norm(pi_int_2, liker_t5)
+cmt1_norm(pi_int_3, liker_t5)
+cmt1_norm(pi_con_scentro, liker_t5)
+cmt1_norm(pi_con_sder, liker_t5)
+cmt1_norm(pi_con_sizq, liker_t5)
+
+
