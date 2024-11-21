@@ -75,34 +75,7 @@ package object Opinion {
   type WeightedGraph = (Int, Int) => Double
   type SpecificWeightedGraph = (WeightedGraph, Int)
   type GenericWeightedGraph = Int => SpecificWeightedGraph
-
-  type FunctionUpdate = (SpecificBelief, SpecificWeightedGraph) => SpecificBelief
-
-  def confBiasUpdate(b: SpecificBelief, swg: SpecificWeightedGraph): SpecificBelief = {
-    val n = b.length
-    val (weightFunction, _) = swg  // Extrae la función de peso de la tupla
-
-    // Actualiza la creencia de cada agente aplicando el sesgo de confirmación
-    Vector.tabulate(n) { i =>
-      // Calcula el valor de ajuste para cada agente j que influye sobre el agente i
-      val influencias = for {
-        j <- 0 until n if weightFunction(j, i) > 0
-      } yield {
-        val beta_ij = 1 - math.abs(b(j) - b(i))
-        beta_ij * weightFunction(j, i) * (b(j) - b(i))
-      }
-
-      // Verifica si hay influencias para evitar divisiones por cero
-      if (influencias.isEmpty) b(i) // Sin influencias, conserva la creencia original
-      else b(i) + influencias.sum / influencias.size
-    }
-  }
-
-
-  /*def confBiasUpdate(sb: SpecificBelief, swg: SpecificWeightedGraph): SpecificBelief = {
-
-  }*/
-
+  
 //  def showWeightedGraph(swg: SpecificWeightedGraph): IndexedSeq[IndexedSeq[Double]] = {
 //    //Extrae la función de influencia y el número de agentes del SpecificWeightedGraph
 //    val (graphFunc, nags) = swg
@@ -116,9 +89,39 @@ package object Opinion {
 //    }
 //  }
 
-  def simulate(fu: FunctionUpdate, swg: SpecificWeightedGraph, b0: SpecificBelief, t: Int): IndexedSeq[SpecificBelief] = {
-  ...
-  }
+//    def confBiasUpdate(b: SpecificBelief, swg: SpecificWeightedGraph): SpecificBelief = {
+//    val n = b.length
+//    val (weightFunction, _) = swg  // Extrae la función de peso de la tupla
+//
+//    // Actualiza la creencia de cada agente aplicando el sesgo de confirmación
+//    Vector.tabulate(n) { i =>
+//      // Calcula el valor de ajuste para cada agente j que influye sobre el agente i
+//      val influencias = for {
+//        j <- 0 until n if weightFunction(j, i) > 0
+//      } yield {
+//        val beta_ij = 1 - math.abs(b(j) - b(i))
+//        beta_ij * weightFunction(j, i) * (b(j) - b(i))
+//      }
+//
+//      // Verifica si hay influencias para evitar divisiones por cero
+//      if (influencias.isEmpty) b(i) // Sin influencias, conserva la creencia original
+//      else b(i) + influencias.sum / influencias.size
+//    }
+//  }
+  
+  type FunctionUpdate = (SpecificBelief, SpecificWeightedGraph) => SpecificBelief
+
+//  def simulate(fu: FunctionUpdate, swg:SpecificWeightedGraph, b0:SpecificBelief, t:Int):IndexedSeq[SpecificBelief] = {
+//    //Genera una secuencia de creencias usando iteración sobre los pasos de tiempo
+//    (0 until t).foldLeft(IndexedSeq(b0)) { (creencias, _) =>
+//      //Accede a la ultima creencia calculada en la secuencia
+//      val ultimaCreencia = creencias.last
+//      
+//      //Aplica la función de actualización (fu) a la última creencia para obtener la nueva creencia
+//      //Ademas se crea una nueva secuencia añadiendo la nueva creencia al final de la secuencia existente
+//      creencias :+ fu(ultimaCreencia, swg)
+//    }
+//  }
 
   // Versiones paralelas
   def rhoPar(alpha: Double, beta: Double): AgentsPolMeasure = {
