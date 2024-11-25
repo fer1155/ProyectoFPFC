@@ -78,8 +78,24 @@ package object Opinion {
 
   type FunctionUpdate = (SpecificBelief, SpecificWeightedGraph) => SpecificBelief
 
-  def confBiasUpdate(sb: SpecificBelief, swg: SpecificWeightedGraph): SpecificBelief = {
-  ...
+  def confBiasUpdate(b: SpecificBelief, swg: SpecificWeightedGraph): SpecificBelief = {
+    val n = b.length
+    val (weightFunction, _) = swg  // Extrae la función de peso de la tupla
+
+    // Actualiza la creencia de cada agente aplicando el sesgo de confirmación
+    Vector.tabulate(n) { i =>
+      // Calcula el valor de ajuste para cada agente j que influye sobre el agente i
+      val influencias = for {
+        j <- 0 until n if weightFunction(j, i) > 0
+      } yield {
+        val beta_ij = 1 - math.abs(b(j) - b(i))
+        beta_ij * weightFunction(j, i) * (b(j) - b(i))
+      }
+
+      // Verifica si hay influencias para evitar divisiones por cero
+      if (influencias.isEmpty) b(i) // Sin influencias, conserva la creencia original
+      else b(i) + influencias.sum / influencias.size
+    }
   }
 
   def showWeightedGraph(swg: SpecificWeightedGraph): IndexedSeq[IndexedSeq[Double]] = {
@@ -96,7 +112,28 @@ package object Opinion {
   ...
   }
 
-  def confBiasUpdatePar(sb: SpecificBelief, swg: SpecificWeightedGraph): SpecificBelief = {
-  ...
+  def confBiasUpdatePar(n: Int, b: Vector[Double], swg: (Int, Int) => Double): Vector[Double] = {
+    // Función para calcular la nueva creencia de un agente
+    def actualizarCreenciaParaAgente(i: Int): Double = {
+      val influencias = for {
+        j <- 0 until n if swg(j, i) > 0
+      } yield {
+        val beta_ij = 1 - math.abs(b(j) - b(i))
+        beta_ij * swg(j, i) * (b(j) - b(i))
+      }
+
+      // Calcula la nueva creencia
+      if (influencias.isEmpty) b(i)
+      else b(i) + influencias.sum / influencias.size
+    }
+
+    // Divide las tareas en partes y usa `parallel` para ejecutarlas
+    val (parte1, parte2) = parallel(
+      (0 until n / 2).map(actualizarCreenciaParaAgente).toVector,
+      (n / 2 until n).map(actualizarCreenciaParaAgente).toVector
+    )
+
+    // Combina los resultados de las partes
+    parte1 ++ parte2
   }
 }

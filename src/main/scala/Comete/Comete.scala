@@ -51,9 +51,16 @@ package object Comete {
 //    }
 //  }
 //
-    def normalizar(m: MedidaPol): MedidaPol = {
-//
-//
-    }
+def normalizar(m: MedidaPol): MedidaPol = {
+  // Define el peor caso de polarización (0.5 en los extremos 0 y 1, y 0 en los otros valores)
+  val peorCaso: Frequency = Vector(0.5, 0.0, 0.0, 0.0, 0.5)
+  val valoresDistribucion: DistributionValues = Vector(0.0, 0.25, 0.5, 0.75, 1.0)
+  // Calcula la polarización máxima
+  val maxPolarizacion = m(peorCaso, valoresDistribucion)
+  distribucion => {
+    val resultado = m(distribucion) / maxPolarizacion
+    math.round(resultado * 1000) / 1000.0
+  }
  }
+}
 //
