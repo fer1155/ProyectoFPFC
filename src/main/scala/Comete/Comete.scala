@@ -1,4 +1,4 @@
-import Comete.{DistributionValues, MedidaPol}
+import Comete.{DistributionValues, PolMeasure}
 
 import scala.annotation.tailrec
 import scala.math.BigDecimal.double2bigDecimal
@@ -22,50 +22,49 @@ package object Comete {
   // (Pi,dv) es una distribucion si Pi es una frecuencia y dv son los valores de distribucion
   // Son de la misma longitud
 
-  type MedidaPol = Distribution => Double
-  // Funcion xd
+  type PolMeasure = Distribution => Double
 
-  def min_p(f: Double => Double, min: Double, max: Double, prec: Double): Double =
+
+  //Funcion min_p
+  @tailrec
+  def min_p(f: Double => Double, min: Double, max: Double, prec: Double): Double = {
     if (max - min < prec) (min + max) / 2
     else {
-      val step = (max - min) / 10
-      val points = (0 to 10).map(i => min + i * step)
-      val minIndex = points.indices.minBy(i => f(points(i)))
-      val (left, right) = (if (minIndex > 0) points(minIndex - 1) else min,
-        if (minIndex < points.size - 1) points(minIndex + 1) else max)
+      val tam = (max - min) / 10
+      val puntos = (0 to 10).map(i => min + i * tam)
+      val indMin = puntos.indices.minBy(i => f(puntos(i)))
+      val (izq, der) = (if (indMin > 0) puntos(indMin - 1) else min,
+        if (indMin < puntos.size - 1) puntos(indMin + 1) else max)
 
-      if (math.abs((min + max) / 2 - points(minIndex)) < prec) points(minIndex)
-      else min_p(f, left, right, prec)
+      if (math.abs((min + max) / 2 - puntos(indMin)) < prec) puntos(indMin)
+      else min_p(f, izq, der, prec)
     }
-
-
-  //Funcion Auxiliar
-  def rhoCMT_Gen(alpha: Double, beta: Double): MedidaPol = {
-    def rhoAux(dist: Distribution, p: Double): Double = {
-      val (frecuencias, valores) = dist
-      frecuencias.zip(valores)
-        .map { case (pi, yi) =>
-          math.pow(pi, alpha) * math.pow(math.abs(yi - p), beta)
-        }.sum
-    }
-
-    def medidaComete(dist: Distribution): Double = {
-      // Función auxiliar que será minimizada
-      val f = (p: Double) => rhoAux(dist, p)
-      // Buscamos el mínimo en el intervalo [0,1] con precisión 0.001
-      val p_min = min_p(f, 0.0, 1.0, 0.001)
-
-      // Devolvemos el valor mínimo encontrado
-      val resultado = rhoAux(dist, p_min)
-      math.round(resultado * 1000) / 1000.0
-    }
-
-    medidaComete
   }
 
+  //Funcion rhoCMT_Gen
 
-  def normalizar(m: MedidaPol): MedidaPol = {
-    // Define el peor caso de polarización (0.5 en los extremos 0 y 1, y 0 en los otros valores)
+  def rhoCMT_Gen(alpha: Double, beta: Double): PolMeasure = {
+    (distribucion: (Frequency, DistributionValues))=> {
+      val (frecuencias, valores) = distribucion
+
+      def calPaux(p: Double): Double = {
+        frecuencias.indices.map { i =>
+          val pi = frecuencias(i)
+          val yi = valores(i)
+          math.pow(pi, alpha) * math.pow(math.abs(yi - p), beta)
+        }.sum
+      }
+
+      // valor p_min que minimiza rho
+      val p_min = min_p(calPaux, 0.0, 1.0, 0.001)
+      val resultado = calPaux(p_min)
+      math.round(resultado * 1000) / 1000.0
+    }
+  }
+
+  //Funcion normalizar
+  def normalizar(m: PolMeasure): PolMeasure = {
+    // Define el peor caso de polarización
     val peorCaso: Frequency = Vector(0.5, 0.0, 0.0, 0.0, 0.5)
     val valoresDistribucion: DistributionValues = Vector(0.0, 0.25, 0.5, 0.75, 1.0)
     // Calcula la polarización máxima
@@ -76,7 +75,4 @@ package object Comete {
     }
   }
 
-
-
 }
-//
